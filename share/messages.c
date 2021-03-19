@@ -43,17 +43,12 @@ int SendBuffer(const char* Buffer, int BytesToSend, SOCKET sd, SOCKADDR_IN RecvA
  * Str - the string to send.
  * sd - the socket used for communication.
  */
-int SendString(const char* Str, SOCKET sd, char* RecvPort, char* RecvIP)
+int SendString(const char* Str, SOCKET sd, SOCKADDR_IN RecvAddr)
 {
 	/* Send the the request to the server on socket sd */
 	int TotalStringSizeInBytes;
 	int SendRes;
-    SOCKADDR_IN RecvAddr;
 
-    //init Recv addr
-    RecvAddr.sin_family = AF_INET;
-    RecvAddr.sin_port = htons(atoi(RecvPort));
-    RecvAddr.sin_addr.s_addr = inet_addr(RecvIP);
 
 	/* The request is sent in two parts. First the Length of the string (stored in
 	   an int variable ), then the string itself. */

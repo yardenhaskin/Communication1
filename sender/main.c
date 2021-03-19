@@ -33,13 +33,18 @@ int main(int argc, char* argv[])
 		return ERROR_CODE;
 	}
 
+	SOCKADDR_IN RecvAddr;
 
+	//init Recv addr
+	RecvAddr.sin_family = AF_INET;
+	RecvAddr.sin_port = htons(atoi(channel_port));
+	RecvAddr.sin_addr.s_addr = inet_addr(channel_ip);
 
 	//FIXME: replace with real file content
 	char* StrBuffer = NULL;
 	StrBuffer = "This is a test, make sure everything is working well. This text should be long eonugh to be forwarded in more than one chunk";
 
-	int send_suceed = SendString(StrBuffer, SendSocket, channel_port, channel_ip);
+	int send_suceed = SendString(StrBuffer, SendSocket, RecvAddr);
 	if (send_suceed == ERROR_CODE)
 	{
 		return ERROR_CODE;

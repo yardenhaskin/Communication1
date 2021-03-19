@@ -13,20 +13,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <Windows.h>
-#include <math.h>
-#include <time.h>
 #pragma comment(lib, "ws2_32.lib")
 
 #include "winsock2.h"
 #include "ws2tcpip.h"
-
-int generate_noise(unsigned char* received_msg, unsigned char* noise_msg, int single_bit_err_prob);
-void generate_noise_for_byte(unsigned char* received_msg, unsigned char* noise_msg, double p, int byte_index);
-int get_num_of_flips(int num_of_bits, double p);
-int choose(n, k);
-
-
-
 
 
 #endif // __main_h__

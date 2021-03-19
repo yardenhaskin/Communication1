@@ -1,3 +1,7 @@
-﻿  main.c
+﻿  messages.c
+  main.c
+C:\Users\leose\source\repos\ex1\share\messages.h(33,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\ws2ipdef.h(935): message : see previous definition of 'INET_ADDRSTRLEN'
 C:\Users\leose\source\repos\ex1\sender\main.c(31,44): warning C4133: 'function': incompatible types - from 'char [31]' to 'const wchar_t *const '
+  Generating Code...
   sender.vcxproj -> C:\Users\leose\source\repos\ex1\Debug\sender.exe
