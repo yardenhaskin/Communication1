@@ -7,6 +7,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 
+
 //includes
 #include <stdio.h>
 #include <stdbool.h>
@@ -18,7 +19,6 @@
 #include "winsock2.h"
 #include "ws2tcpip.h"
 
-
-#define SENDER_PORT 635
+#define TIMEOUT_MS 1000
 
 #endif // __main_h__

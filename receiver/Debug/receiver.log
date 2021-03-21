@@ -1,2 +1,5 @@
 ﻿  main.c
+C:\Users\leose\source\repos\ex1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\ws2ipdef.h(935): message : see previous definition of 'INET_ADDRSTRLEN'
+C:\Users\leose\source\repos\ex1\receiver\main.c(25,16): warning C4101: 'listen_res': unreferenced local variable
   receiver.vcxproj -> C:\Users\leose\source\repos\ex1\Debug\receiver.exe

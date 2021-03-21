@@ -43,22 +43,17 @@ int SendBuffer(const char* Buffer, int BytesToSend, SOCKET sd, SOCKADDR_IN RecvA
  * Str - the string to send.
  * sd - the socket used for communication.
  */
-int SendString(const char* Str, SOCKET sd, char* RecvPort, char* RecvIP)
+int SendString(const char* Str, SOCKET sd, SOCKADDR_IN RecvAddr, int BytesToSend)
 {
 	/* Send the the request to the server on socket sd */
 	int TotalStringSizeInBytes;
 	int SendRes;
-    SOCKADDR_IN RecvAddr;
 
-    //init Recv addr
-    RecvAddr.sin_family = AF_INET;
-    RecvAddr.sin_port = htons(atoi(RecvPort));
-    RecvAddr.sin_addr.s_addr = inet_addr(RecvIP);
 
 	/* The request is sent in two parts. First the Length of the string (stored in
 	   an int variable ), then the string itself. */
 
-	TotalStringSizeInBytes = (int)(strlen(Str) + 1); // terminating zero also sent	
+	TotalStringSizeInBytes = BytesToSend;
 
 	SendRes = SendBuffer(
 		(const char*)(&TotalStringSizeInBytes),
@@ -106,6 +101,8 @@ int ReceiveBuffer(char* OutputBuffer, int BytesToReceive, SOCKET sd, int timeout
 		BytesJustTransferred = recvfrom(sd, CurPlacePtr, RemainingBytesToReceive, 0, (SOCKADDR*)SenderAddr, SenderAddrSize);
 		if (BytesJustTransferred == SOCKET_ERROR)
 		{
+			if (WSAEWOULDBLOCK == WSAGetLastError())// no accept - loop again
+				return NREADY;
 			if (WSAGetLastError() == WSAETIMEDOUT || WSAGetLastError() == WSAECONNRESET)
 				return ERROR_CODE;
 			printf("recv() failed, error %d\n", WSAGetLastError());
@@ -140,12 +137,11 @@ int ReceiveBuffer(char* OutputBuffer, int BytesToReceive, SOCKET sd, int timeout
  * TRNS_DISCONNECTED - if the socket was disconnected
  * TRNS_FAILED - otherwise
  */
-int ReceiveString(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize)
+int ReceiveString(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize, int* recv_msg_size)
 {
 	/* Recv the request from the server on socket sd */
 	int TotalStringSizeInBytes;
 	int RecvRes;
-	char* StrBuffer = NULL;
 
 	/* The request is received in two parts. First the Length of the string (stored in
 	   an int variable ), then the string itself. */
@@ -156,23 +152,19 @@ int ReceiveString(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAd
 		sd,
 		timeout, SenderAddr, SenderAddrSize);
 
-	if (RecvRes != 0) return ERROR_CODE;
+	if (RecvRes != 0) return RecvRes;
 
-	StrBuffer = (char*)malloc(TotalStringSizeInBytes * sizeof(char));
+	RecvRes = NREADY;
+	while (RecvRes == NREADY)
+	{
+		RecvRes = ReceiveBuffer(
+			(char*)(OutputStr),
+			(int)(TotalStringSizeInBytes),
+			sd,
+			timeout, SenderAddr, SenderAddrSize);
+	}
 
-	if (StrBuffer == NULL)
-		return ERROR_CODE;
-
-	RecvRes = ReceiveBuffer(
-		(char*)(StrBuffer),
-		(int)(TotalStringSizeInBytes),
-		sd,
-		timeout, SenderAddr, SenderAddrSize);
-
-	if (RecvRes == 0)
-		strcpy_s(OutputStr, MAX_MSG_LEN, StrBuffer);
-
-	free(StrBuffer);
+	*recv_msg_size = TotalStringSizeInBytes;
 
 	return RecvRes;
 }

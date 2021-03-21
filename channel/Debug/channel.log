@@ -1,8 +1,2 @@
-﻿  main.c
-C:\Users\leose\source\repos\ex1\channel\main.c(40,44): warning C4133: 'function': incompatible types - from 'char [31]' to 'const wchar_t *const '
-C:\Users\leose\source\repos\ex1\channel\main.c(60,46): warning C4047: 'function': 'char *' differs in levels of indirection from 'char *[150]'
-C:\Users\leose\source\repos\ex1\channel\main.c(60,34): warning C4024: 'ReceiveString': different types for formal and actual parameter 1
-C:\Users\leose\source\repos\ex1\channel\main.c(66,21): warning C4047: 'function': 'const char *const ' differs in levels of indirection from 'char *[150]'
-C:\Users\leose\source\repos\ex1\channel\main.c(66,9): warning C4024: 'printf': different types for formal and actual parameter 1
-C:\Users\leose\source\repos\ex1\channel\main.c(23,16): warning C4101: 'listen_res': unreferenced local variable
+﻿  messages.c
   channel.vcxproj -> C:\Users\leose\source\repos\ex1\Debug\channel.exe

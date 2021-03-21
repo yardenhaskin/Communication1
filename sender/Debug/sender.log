@@ -1,3 +1,2 @@
-﻿  main.c
-C:\Users\leose\source\repos\ex1\sender\main.c(31,44): warning C4133: 'function': incompatible types - from 'char [31]' to 'const wchar_t *const '
+﻿  messages.c
   sender.vcxproj -> C:\Users\leose\source\repos\ex1\Debug\sender.exe
