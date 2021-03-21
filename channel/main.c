@@ -18,6 +18,13 @@ int main(int argc, char* argv[])
 	int random_seed = atoi(argv[5]);
 	char received_msg[MAX_MSG_LEN];
 	char noise_msg[MAX_MSG_LEN];
+	int recv_msg_size = 0;
+	int total_msg_size = 0;
+	int bits_flipped = 0;
+	int i = 0;
+	int recv_suceed;
+	int send_suceed;
+	int first_recv = 1;
 
 	SOCKET Socket = INVALID_SOCKET;
 	SOCKADDR_IN service;
@@ -25,7 +32,10 @@ int main(int argc, char* argv[])
 	struct sockaddr_in SenderAddr;
 	int SenderAddrSize = sizeof(SenderAddr);
 	SOCKADDR_IN ReceiverAddr;
-
+	char sender_ip[INET_ADDRSTRLEN];
+	char sender_port[INET_ADDRSTRLEN];
+	char sender_or_receiver_ip[INET_ADDRSTRLEN];
+	char sender_or_receiver_port[INET_ADDRSTRLEN];
 
 
 
@@ -60,31 +70,67 @@ int main(int argc, char* argv[])
 		return ERROR_CODE;
 	}
 
-	int recv_suceed = ReceiveString(received_msg, Socket, INFINITE, &SenderAddr, &SenderAddrSize);
-	if (recv_suceed == ERROR_CODE)
+	while(1)
 	{
-		return ERROR_CODE;
+		recv_suceed = ReceiveString(received_msg, Socket, INFINITE, &SenderAddr, &SenderAddrSize, &recv_msg_size);
+		if (recv_suceed == ERROR_CODE)
+		{
+			return ERROR_CODE;
+		}
+
+		if (first_recv)		//save sender's ip and port
+		{
+			first_recv = 0;
+			inet_ntop(AF_INET, &SenderAddr.sin_addr, sender_ip, sizeof(sender_ip));
+			itoa(ntohs(SenderAddr.sin_port), sender_port, 10);
+		}
+		else
+		{
+			inet_ntop(AF_INET, &SenderAddr.sin_addr, sender_or_receiver_ip, sizeof(sender_or_receiver_ip));
+			itoa(ntohs(SenderAddr.sin_port), sender_or_receiver_port, 10);
+		}
+
+		if (STRINGS_ARE_EQUAL(sender_or_receiver_ip, receiver_ip) &
+			STRINGS_ARE_EQUAL(sender_or_receiver_port, receiver_port)) // msg is from reciever - send back to sender
+			break;
+
+		//printf("msg is: %s\n", received_msg);
+		//printf("msg size is: %d\n", recv_msg_size);
+
+		//Noise the channel
+		srand(random_seed);
+		generate_noise(received_msg, single_bit_err_prob, recv_msg_size, &bits_flipped);
+		//printf("noised msg is: %s\n", noise_msg);
+
+
+
+		//send noisy msg to the receiver
+		ReceiverAddr.sin_family = AF_INET;
+		ReceiverAddr.sin_addr.s_addr = inet_addr(receiver_ip);
+		ReceiverAddr.sin_port = htons(atoi(receiver_port));
+
+		send_suceed = SendString(received_msg, Socket, ReceiverAddr, recv_msg_size);
+		if (send_suceed == ERROR_CODE)
+		{
+			return ERROR_CODE;
+		}
+
+		total_msg_size += recv_msg_size;
 	}
 
-	printf("msg is: %s\n", received_msg);
-
-	//Noise the channel
-	srand(random_seed);
-	generate_noise(received_msg, noise_msg, single_bit_err_prob);
-	printf("noised msg is: %s\n", noise_msg);
-
-
-
+	//send back to sender and finish
 	ReceiverAddr.sin_family = AF_INET;
-	ReceiverAddr.sin_addr.s_addr = inet_addr(receiver_ip);
-	ReceiverAddr.sin_port = htons(atoi(receiver_port));
+	ReceiverAddr.sin_addr.s_addr = inet_addr(sender_ip);
+	ReceiverAddr.sin_port = htons(atoi(sender_port));
 
-	int send_suceed = SendString(received_msg, Socket, ReceiverAddr);
+	send_suceed = SendString(received_msg, Socket, ReceiverAddr, recv_msg_size);
 	if (send_suceed == ERROR_CODE)
 	{
 		return ERROR_CODE;
 	}
-
+	printf("sender: %s\n", sender_ip);
+	printf("reveiver: %s\n", sender_or_receiver_ip);
+	printf("%d bytes, flliped %d bits\n", total_msg_size, bits_flipped);
 
 	//finish
 	closesocket(Socket);
@@ -95,28 +141,29 @@ int main(int argc, char* argv[])
 }
 
 
-int generate_noise(unsigned char* received_msg, unsigned char* noise_msg, int single_bit_err_prob)
+int generate_noise(unsigned char* received_msg, int single_bit_err_prob, int recv_msg_size, int* bits_flipped)
 {
 	double p = single_bit_err_prob / pow(2, 16);
-	strcpy(noise_msg, received_msg);
 
 	int i;
-	for (i = 0; i < strlen(received_msg); i++)
+	for (i = 0; i < recv_msg_size; i++)
 	{
-		generate_noise_for_byte(received_msg, noise_msg, p, i);
+		generate_noise_for_byte(received_msg, p, i, bits_flipped);
 	}
 
 }
 
 
-void generate_noise_for_byte(unsigned char* received_msg, unsigned char* noise_msg, double p, int byte_index)
+void generate_noise_for_byte(unsigned char* received_msg, double p, int byte_index, int* bits_flipped)
 {
 	int i;
 	unsigned char mask = 0x00, temp_mask = 0x00, result;
 	int index;
 	int num_of_flips = get_num_of_flips(8, p);
 	if (num_of_flips != 0)
-		printf("num of flips in Byte %d is: %d\n", byte_index, num_of_flips);
+		printf("num of flips in Byte %d is: %d\n", byte_index, num_of_flips); //FIXME: remove after debug
+
+	*bits_flipped += num_of_flips;
 
 	for (i = 1; i <= num_of_flips; i++)
 	{
@@ -130,11 +177,11 @@ void generate_noise_for_byte(unsigned char* received_msg, unsigned char* noise_m
 
 		mask = temp_mask;
 
-		printf("flip bit is: %d\n", index);
+		printf("flip bit is: %d\n\n", index); //FIXME: remove after debug
 
 		//flip bit
-		 result = noise_msg[byte_index] ^ mask;
-		 noise_msg[byte_index] = result;
+		 result = received_msg[byte_index] ^ mask;
+		 received_msg[byte_index] = result;
 	}
 }
 

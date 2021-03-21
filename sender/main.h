@@ -19,5 +19,6 @@
 #include "ws2tcpip.h"
 
 
+#define SENDER_PORT 635
 
 #endif // __main_h__
