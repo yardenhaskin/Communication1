@@ -1,6 +1,25 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "reciever.h"
 #include "messages.h"
 
+// Data for traffic received
+
+
+int errors_found = 0;
+int errors_fixed = 0;
+int writeCount = 0;
+int packet_bytes_int_arr[PACKET_DATA_SIZE * BYTE_SIZE];
+FILE* fp; //output
+
+
+int open_file(char* file_name) {
+	fp = fopen(file_name, "wb");
+	if (fp == NULL) {
+		fprintf(stderr, "couldn't open file in receiver. please try again");
+		return ERROR_CODE;
+	}
+	return 0;
+}
 int checkQ1(int* beforeDecoding15) {
 	int q1;
 	q1 = beforeDecoding15[2] ^ beforeDecoding15[4] ^ beforeDecoding15[6] ^ beforeDecoding15[8] ^ beforeDecoding15[10] ^ beforeDecoding15[12] ^ beforeDecoding15[14];
@@ -152,14 +171,15 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 	int frame_count = 0;
 	int beforeDecoding15[ENCODED_SIZE];
 	int decodedResult11Bit[DECODED_SIZE];
-	
+	int send_buffer_size;
 	
 
 
 	memset(send_buffer, 0, PACKET_DATA_SIZE); // fill the buffer with  PACKET_DATA_SIZE zeros
 	count_15 = ENCODED_SIZE - 1;
+	send_buffer_size = buffer_size * 11 / 15;
 
-	for (int i = 0; i < buffer_size; i++) {
+	for (int i = 0; i < send_buffer_size; i++) {
 		current = buffer[i];
 
 		for (int j = 0; j < BYTE_SIZE; j++) {
@@ -186,7 +206,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 
 	} // finished reading and decoding the whole packet, time to write it to file 
 
-	IntArrayToSendBuffer(packet_bytes_int_arr, send_buffer, buffer_size);
+	IntArrayToSendBuffer(packet_bytes_int_arr, send_buffer, send_buffer_size);
 }
 
 

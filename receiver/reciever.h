@@ -15,12 +15,7 @@
 #define ENCODED_SIZE 15
 
 
-// Data for traffic received
 
-int errors_found = 0;
-int errors_fixed = 0;
-int writeCount = 0;
-int packet_bytes_int_arr[PACKET_DATA_SIZE * BYTE_SIZE];
 
 ///functions
 int checkQ1(int* beforeDecoding15);
@@ -37,8 +32,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size);
 int checkBuffer(unsigned char buffer[PACKET_TOTAL_SIZE]);
 
 
-int w = sizeof(struct sockaddr);
-FILE* fp; //output
-SOCKET s;
+
+
 
 #endif // __reciever.h__

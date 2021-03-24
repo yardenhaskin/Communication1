@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
 	int data[11];
 	int data_after_hamming[15];
 	int bits_from_file;
+	int bytes_to_file;
 	int data_counter;
 	int ready_bits;
 	int ready_bits_buffer[PACKET_TOTAL_SIZE * BYTE_SIZE * INT_SIZE_IN_BYTES];
@@ -122,7 +123,8 @@ int main(int argc, char* argv[])
 
 		//finished reading and prepering data for a single packet
 		//now we'll send it
-		int send_suceed = SendString(send_buffer, Socket, RecvAddr, bits_from_file);
+		bytes_to_send = bits_from_file * 15 / 88;
+		int send_suceed = SendString(send_buffer, Socket, RecvAddr, bytes_to_send);
 		if (send_suceed == ERROR_CODE)
 		{
 			return ERROR_CODE;

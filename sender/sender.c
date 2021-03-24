@@ -12,6 +12,7 @@ int open_file(char* file_name) {
 		fprintf(stderr, "couldn't open file. please try again");
 		return ERROR_CODE;
 	}
+	return 0;
 }
 //read single bit from file, return -1 if EOF
 int readBit() {

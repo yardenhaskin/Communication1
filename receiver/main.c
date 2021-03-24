@@ -32,9 +32,12 @@ int main(int argc, char* argv[])
 	u_long iMode = 1; //Non-Blocking socket
 	/////////////////////***
 	char file_buffer[ENCODED_SIZE];
-	unsigned char* buffer_PACKET_TOTAL_SIZE = malloc(sizeof(char) * PACKET_TOTAL_SIZE); // create place in stack for the message received 
+	//unsigned char* buffer_PACKET_TOTAL_SIZE = malloc(sizeof(char) * PACKET_TOTAL_SIZE); // create place in stack for the message received 
 	unsigned char rcv_buffer[ENCODED_SIZE];
 	int curr_bytes_received;
+
+	if (open_file(output_file_name) != 0)
+		return(ERROR_CODE);
 	memset(rcv_buffer, 0, ENCODED_SIZE);// Set all elements to 0
 	//////////////////*****
 
@@ -124,7 +127,7 @@ int main(int argc, char* argv[])
 		itoa(ntohs(ChannelAddr.sin_port), channel_port, 10);
 		//printf("\nchannel IP is: %s\nchannel port is: %s\n", channel_ip, channel_port);
 		////////////////////***********
-
+		 
 		msg_corrected = 0;
 		msg_written = 0;
 		error_handler(received_msg, recv_msg_size, &msg_written, &msg_corrected);

@@ -1,18 +1,9 @@
-﻿  messages.c
-  main.c
-C:\Users\leose\source\repos\ex1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
+﻿  main.c
+C:\Users\user\Desktop\communication\ex1\Communication1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\ws2ipdef.h(935): message : see previous definition of 'INET_ADDRSTRLEN'
-C:\Users\leose\source\repos\ex1\receiver\main.c(130,46): warning C4020: 'error_handler': too many actual parameters
-C:\Users\leose\source\repos\ex1\receiver\main.c(34,7): warning C4101: 'file_buffer': unreferenced local variable
-C:\Users\leose\source\repos\ex1\receiver\main.c(37,6): warning C4101: 'curr_bytes_received': unreferenced local variable
-C:\Users\leose\source\repos\ex1\receiver\main.c(26,16): warning C4101: 'listen_res': unreferenced local variable
-  reciever.c
-C:\Users\leose\source\repos\ex1\receiver\reciever.c(100,21): warning C4098: 'writeToFile': 'void' function returning a value
-C:\Users\leose\source\repos\ex1\receiver\reciever.c(116,21): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
-C:\Users\leose\source\repos\ex1\receiver\reciever.c(140,122): warning C4029: declared formal parameter list different from definition
-  Generating Code...
-reciever.obj : error LNK2005: _errors_found already defined in main.obj
-reciever.obj : error LNK2005: _errors_fixed already defined in main.obj
-reciever.obj : error LNK2005: _writeCount already defined in main.obj
-reciever.obj : error LNK2005: _w already defined in main.obj
-C:\Users\leose\source\repos\ex1\Debug\receiver.exe : fatal error LNK1169: one or more multiply defined symbols found
+C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(39,15): warning C4013: 'open_file' undefined; assuming extern returning int
+C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(133,58): warning C4020: 'error_handler': too many actual parameters
+C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(34,7): warning C4101: 'file_buffer': unreferenced local variable
+C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(37,6): warning C4101: 'curr_bytes_received': unreferenced local variable
+C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(26,16): warning C4101: 'listen_res': unreferenced local variable
+  receiver.vcxproj -> C:\Users\user\Desktop\communication\ex1\Communication1\Debug\receiver.exe
