@@ -1,4 +1,5 @@
 #include "sender.h"
+#include "messages.h"
 
 size_t readOneByte() {
 	size_t result;
@@ -9,7 +10,7 @@ int open_file(char* file_name) {
 	fp = fopen(file_name, "rb");
 	if (fp == NULL) {
 		fprintf(stderr, "couldn't open file. please try again");
-		exit(-1);
+		return ERROR_CODE;
 	}
 }
 //read single bit from file, return -1 if EOF
@@ -20,7 +21,7 @@ int readBit() {
 	if (reading_mask == 0) {
 		if (!readOneByte())
 		{
-			return END_OF_FILE; //EOF is -1
+			return END_OF_FILE; //EOF is -5
 		}
 		reading_mask = 1 << (7);
 	}

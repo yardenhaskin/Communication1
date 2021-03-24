@@ -33,7 +33,7 @@ DWORD end_thread_action(void* not_relevant);
 #define STRINGS_ARE_EQUAL( Str1, Str2 ) ( strcmp( (Str1), (Str2) ) == 0 )
 static const int ERROR_CODE = -1;
 #define MY_ADDRESS "127.0.0.1"
-#define MAX_MSG_LEN 90
+#define PACKET_TOTAL_SIZE 120// = 15(bits)*8(total bytes per message) in bytes
 #define INET_ADDRSTRLEN 30
 #define SUMMARY_MSG 200
 #define MAX_INT_LEN 15

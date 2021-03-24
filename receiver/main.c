@@ -14,11 +14,11 @@ int main(int argc, char* argv[])
 
 	char* receiver_port = argv[1];
 	char* output_file_name = argv[2];
-	char received_msg[MAX_MSG_LEN];
+	char received_msg[PACKET_TOTAL_SIZE];
 	int recv_msg_size = 0;
 	int i = 0;
 	int total_msg_size = 0, total_written = 0, total_corrected = 0;
-	int send_suceed;
+	int send_suceed, msg_written, msg_corrected;
 	char summary_msg[SUMMARY_MSG];
 
 	SOCKET Socket = INVALID_SOCKET;
@@ -124,28 +124,18 @@ int main(int argc, char* argv[])
 		itoa(ntohs(ChannelAddr.sin_port), channel_port, 10);
 		//printf("\nchannel IP is: %s\nchannel port is: %s\n", channel_ip, channel_port);
 		////////////////////***********
-		memset(buffer_PACKET_TOTAL_SIZE, 0, PACKET_TOTAL_SIZE);
 
-		////WE NEED TO CHANGE THAT IN THE INTEGRATION. I USED "recvfrom"
-		curr_bytes_received = recvfrom(s, buffer_PACKET_TOTAL_SIZE, PACKET_TOTAL_SIZE, 0, (struct sockaddr*) & ChannelAddr, &w);
-		if (curr_bytes_received < 0) {
-			fprintf(stderr, "Error in recvfrom!\n");
-			exit(-1);
-		}
-		totalBytes = totalBytes + curr_bytes_received;
-		error_handler(buffer_PACKET_TOTAL_SIZE);
-		writeCount += PACKET_DATA_SIZE;
-	}
+		msg_corrected = 0;
+		msg_written = 0;
+		error_handler(received_msg, recv_msg_size, &msg_written, &msg_corrected);
 
-	free(buffer_PACKET_TOTAL_SIZE);
+
 	//////////////********
 
-	//	total_msg_size += recv_msg_size;
-
-		//FIXME add here the write to file code and update wrote, detected & corected
-		//total_written += 0;
-		//total_corrected += 0;
-	//}
+		total_msg_size += recv_msg_size;
+		total_written += msg_written;
+		total_corrected += msg_corrected;
+	}
 
 	//end received
 
@@ -202,7 +192,7 @@ void construct_summary_msg(char* summary_msg, int total_msg_size, int total_writ
 
 DWORD end_thread_action(void* not_relevant)
 {
-	char str_from_user[MAX_MSG_LEN];
+	char str_from_user[PACKET_TOTAL_SIZE];
 
 	while (1)
 	{

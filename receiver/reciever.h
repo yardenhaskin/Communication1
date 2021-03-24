@@ -1,3 +1,6 @@
+#ifndef __reciever_h__
+#define __reciever_h__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +17,6 @@
 
 // Data for traffic received
 
-int totalBytes = 0;
 int errors_found = 0;
 int errors_fixed = 0;
 int writeCount = 0;
@@ -29,13 +31,14 @@ int errorFixed(int* beforeDecoding15, int q1, int q2, int q4, int q8);
 int calculateBitToFix(int* beforeDecoding15, int q1, int q2, int q4, int q8);
 int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15);
 void flip_bit(int* res_15, int bitToFix);
-void writeToFile(unsigned char* send_buffer);
-void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer);
-void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE]);
+void writeToFile(unsigned char* send_buffer, int buffer_size);
+void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size);
+void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size);
 int checkBuffer(unsigned char buffer[PACKET_TOTAL_SIZE]);
 
 
 int w = sizeof(struct sockaddr);
 FILE* fp; //output
 SOCKET s;
-#pragma once
+
+#endif // __reciever.h__

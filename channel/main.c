@@ -16,8 +16,8 @@ int main(int argc, char* argv[])
 	char* receiver_port = argv[3];
 	int single_bit_err_prob = atoi(argv[4]);
 	int random_seed = atoi(argv[5]);
-	char received_msg[MAX_MSG_LEN];
-	char noise_msg[MAX_MSG_LEN];
+	char received_msg[PACKET_TOTAL_SIZE];
+	char noise_msg[PACKET_TOTAL_SIZE];
 	int recv_msg_size = 0;
 	int total_msg_size = 0;
 	int bits_flipped = 0;

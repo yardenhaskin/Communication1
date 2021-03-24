@@ -1,5 +1,5 @@
 #include "reciever.h"
-
+#include "messages.h"
 
 int checkQ1(int* beforeDecoding15) {
 	int q1;
@@ -94,31 +94,31 @@ void flip_bit(int* res_15, int bitToFix)
 
 	return;
 }
-void writeToFile(unsigned char* send_buffer) {
-	if (fwrite(send_buffer, sizeof(char), PACKET_DATA_SIZE, fp) < 0) {
+void writeToFile(unsigned char* send_buffer, int buffer_size) {
+	if (fwrite(send_buffer, sizeof(char), buffer_size, fp) < 0) {
 		fprintf(stderr, "Error accured while trying to write to the file. please try again\n");
-		exit(-1);
+		return(ERROR_CODE);
 	}
 }
 // this function converts int array into unsigned char array and writes it to file 
-void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer)
+void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size)
 {
 	int temp = 0;
-	int i = 0, j = 0, currentent = 0;
+	int i = 0, j = 0, current = 0;
 
-	for (i = 0; i < (PACKET_DATA_SIZE); i++)
+	for (i = 0; i < buffer_size; i++)
 	{
-		currentent = 0;
+		current = 0;
 		for (j = 7; j >= 0; j--)
 		{
 
 			temp = data_array_int[7 - j + (i * 8)];
 			temp *= pow(2, j);
-			currentent += temp;
+			current += temp;
 		}
-		send_buffer[i] = currentent;
+		send_buffer[i] = current;
 	}
-	writeToFile(send_buffer);
+	writeToFile(send_buffer, buffer_size);
 	//if (fwrite(send_buffer, sizeof(char), PACKET_DATA_SIZE, fp) < 0) {
 	//	fprintf(stderr, "Error accured while trying to write to the file. please try again\n");
 	//	exit(-1);
@@ -137,7 +137,7 @@ int checkBuffer(unsigned char buffer[PACKET_TOTAL_SIZE]) {
 	}
 	return 0;
 }
-void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE]) {
+void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int* buffer_written, int* buffer_corrected) {
 	if (checkBuffer(buffer)<0) {
 		return;
 	}
@@ -152,12 +152,14 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE]) {
 	int frame_count = 0;
 	int beforeDecoding15[ENCODED_SIZE];
 	int decodedResult11Bit[DECODED_SIZE];
+	
+	
 
 
 	memset(send_buffer, 0, PACKET_DATA_SIZE); // fill the buffer with  PACKET_DATA_SIZE zeros
 	count_15 = ENCODED_SIZE - 1;
 
-	for (int i = 0; i < PACKET_TOTAL_SIZE; i++) {
+	for (int i = 0; i < buffer_size; i++) {
 		current = buffer[i];
 
 		for (int j = 0; j < BYTE_SIZE; j++) {
@@ -167,6 +169,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE]) {
 			if (count_15 < 0)
 			{
 				bitToFix = decode_hamming(decodedResult11Bit, beforeDecoding15); // will fill decoded resolution to the int array - before flipping the bit 
+				//*buffer_corrected += 1; FIXME
 
 
 
@@ -183,7 +186,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE]) {
 
 	} // finished reading and decoding the whole packet, time to write it to file 
 
-	IntArrayToSendBuffer(packet_bytes_int_arr, send_buffer);
+	IntArrayToSendBuffer(packet_bytes_int_arr, send_buffer, buffer_size);
 }
 
 

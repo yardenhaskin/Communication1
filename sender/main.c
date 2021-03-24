@@ -31,10 +31,8 @@ int main(int argc, char* argv[])
 	int bytesLeftToSend;
 	int totalBytesSent = 0;
 	int end_of_file = 0;
-	int channel_port;
 	int next_bit;
 	char* ip;
-	char* file_name;
 	char receive_buffer[PACKET_TOTAL_SIZE];
 
 	int data[11];
@@ -42,7 +40,7 @@ int main(int argc, char* argv[])
 	int bits_from_file;
 	int data_counter;
 	int ready_bits;
-	int ready_bits_buffer[PACKET_TOTAL_SIZE * BYTE_SIZE];
+	int ready_bits_buffer[PACKET_TOTAL_SIZE * BYTE_SIZE * INT_SIZE_IN_BYTES];
 	unsigned char send_buffer[PACKET_TOTAL_SIZE];
 
 	///////////////////////////////////////////////
@@ -50,7 +48,7 @@ int main(int argc, char* argv[])
 
 	//init WinSock
 	WSADATA wsaData;
-	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != NO_ERROR)
 	{
 		printf("Error at WSAStartup()\n");
@@ -85,7 +83,7 @@ int main(int argc, char* argv[])
 	RecvAddr.sin_addr.s_addr = inet_addr(channel_ip);
 	//////////////////*****from here
 	if (open_file(file_name) != 0)
-		exit(-1);
+		return(ERROR_CODE);
 	// sender functionality: reading from file -> creating a message -> sending messages
 	while (true) {
 		//initialize "ready_bits_buffer(array of zeros
@@ -124,44 +122,17 @@ int main(int argc, char* argv[])
 
 		//finished reading and prepering data for a single packet
 		//now we'll send it
-		bytesLeftToSend = PACKET_TOTAL_SIZE;
-		while (bytesLeftToSend > 0) {
-			bytes_sent = sendto(s, send_buffer + PACKET_TOTAL_SIZE - bytesLeftToSend, bytesLeftToSend, 0, (struct sockaddr*) & ChannelAddr, sizeof_sockaddr);
-			if (bytes_sent < 0) {
-				fprintf(stderr, "failed sending bytes to channel\n");
-				exit(-1);
-			}
-			bytesLeftToSend -= bytes_sent;
-			totalBytesSent += bytes_sent;
-		}
-		//		totalBytesSent = totalBytesSent + FRAME_SIZE;	
-	}
-	///////
-
-
-	//FIXME: replace with real file content
-	char* StrBuffer = NULL;
-	StrBuffer = "This is a test, make sure everything is working well. This text should be long eonugh to be forwarded in more than one chunk";
-
-	while (1) //FIXME: change to file read until EOF
-	{
-		if (0 == (strlen(StrBuffer) + 1) / MAX_MSG_LEN) //FIXME: change to size of bytes you read from file
-			bytes_to_send = (strlen(StrBuffer) + 1) % MAX_MSG_LEN;
-		else
-			bytes_to_send = MAX_MSG_LEN;
-		//printf("bytes_to_send: %d\n", bytes_to_send);
-		int send_suceed = SendString(StrBuffer, Socket, RecvAddr, bytes_to_send);
+		int send_suceed = SendString(send_buffer, Socket, RecvAddr, bits_from_file);
 		if (send_suceed == ERROR_CODE)
 		{
 			return ERROR_CODE;
 		}
 
-		if (0 == ((strlen(StrBuffer) + 1) / MAX_MSG_LEN)) //FIXME: remove after adding the file reading func
-			break;
-
-		StrBuffer += bytes_to_send;
-
+		//		totalBytesSent = totalBytesSent + FRAME_SIZE;	
 	}
+	///////
+
+
 
 	//////////////////*****
 	//wait for summary msg
