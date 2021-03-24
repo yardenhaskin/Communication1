@@ -27,6 +27,9 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sender.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\share\messages.h">
@@ -34,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sender.h">
+      <Filter>Shared Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

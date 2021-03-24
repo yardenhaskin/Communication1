@@ -142,10 +142,12 @@
   <ItemGroup>
     <ClCompile Include="..\share\messages.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="reciever.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\share\messages.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="reciever.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 			if (data_counter == BEFORE_HAMMING - 1) {///means end of the array
 				create_hamming(data, data_after_hamming); // creating hammig code 
 				concatenate(ready_bits_buffer, data_after_hamming, AFTER_HAMMING, ready_bits); // adding it to buffer
-				ready_bits += 15;
+				ready_bits += AFTER_HAMMING;
 				data_counter = 0;
 			}
 			else
