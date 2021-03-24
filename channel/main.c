@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 	char sender_or_receiver_ip[INET_ADDRSTRLEN];
 	char sender_or_receiver_port[INET_ADDRSTRLEN];
 
-
+	srand(random_seed);
 
 
 	//init WinSock
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 		//printf("msg size is: %d\n", recv_msg_size);
 
 		//Noise the channel
-		srand(random_seed);
+
 		generate_noise(received_msg, single_bit_err_prob, recv_msg_size, &bits_flipped);
 		//printf("noised msg is: %s\n", noise_msg);
 
