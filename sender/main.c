@@ -1,5 +1,6 @@
 #include "main.h"
 #include "messages.h"
+#include "sender.h"
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +25,27 @@ int main(int argc, char* argv[])
 	struct sockaddr_in ChannelAddr;
 	int ChannelAddrSize = sizeof(ChannelAddr);
 	int recv_msg_size = 0;
+	/////////////////////////////////////////////////////
+	int iResult = 0;
+	int bytes_sent;
+	int bytesLeftToSend;
+	int totalBytesSent = 0;
+	int end_of_file = 0;
+	int channel_port;
+	int next_bit;
+	char* ip;
+	char* file_name;
+	char receive_buffer[PACKET_TOTAL_SIZE];
 
+	int data[11];
+	int data_after_hamming[15];
+	int bits_from_file;
+	int data_counter;
+	int ready_bits;
+	int ready_bits_buffer[PACKET_TOTAL_SIZE * BYTE_SIZE];
+	unsigned char send_buffer[PACKET_TOTAL_SIZE];
+
+	///////////////////////////////////////////////
 
 
 	//init WinSock
@@ -62,6 +83,61 @@ int main(int argc, char* argv[])
 	RecvAddr.sin_family = AF_INET;
 	RecvAddr.sin_port = htons(atoi(channel_port));
 	RecvAddr.sin_addr.s_addr = inet_addr(channel_ip);
+	//////////////////*****from here
+	if (open_file(file_name) != 0)
+		exit(-1);
+	// sender functionality: reading from file -> creating a message -> sending messages
+	while (true) {
+		//initialize "ready_bits_buffer(array of zeros
+		memset(ready_bits_buffer, 0, (PACKET_TOTAL_SIZE * BYTE_SIZE * INT_SIZE_IN_BYTES));
+		if (feof(fp)) {
+			break;
+		}
+
+		ready_bits = 0;
+		data_counter = 0;
+		bits_from_file = 0;
+
+		//read file and creating the hamming code, put it in a buffer ( array of ints)
+		while (bits_from_file < (PACKET_DATA_SIZE * BYTE_SIZE)) { //iteration to read bits from file to fill a message
+
+			next_bit = readBit();
+			//if EOF continue to sending the messages
+			if (next_bit == -1) {
+				end_of_file = 1;
+				break;
+			}
+
+			data[data_counter] = next_bit;
+			if (data_counter == BEFORE_HAMMING - 1) {///means end of the array
+				create_hamming(data, data_after_hamming); // creating hammig code 
+				concatenate(ready_bits_buffer, data_after_hamming, AFTER_HAMMING, ready_bits); // adding it to buffer
+				ready_bits += 15;
+				data_counter = 0;
+			}
+			else
+				data_counter++;
+
+			bits_from_file++;
+		}
+		intArrayToUnsignedChar(ready_bits_buffer, send_buffer, PACKET_TOTAL_SIZE);
+
+		//finished reading and prepering data for a single packet
+		//now we'll send it
+		bytesLeftToSend = PACKET_TOTAL_SIZE;
+		while (bytesLeftToSend > 0) {
+			bytes_sent = sendto(s, send_buffer + PACKET_TOTAL_SIZE - bytesLeftToSend, bytesLeftToSend, 0, (struct sockaddr*) & ChannelAddr, sizeof_sockaddr);
+			if (bytes_sent < 0) {
+				fprintf(stderr, "failed sending bytes to channel\n");
+				exit(-1);
+			}
+			bytesLeftToSend -= bytes_sent;
+			totalBytesSent += bytes_sent;
+		}
+		//		totalBytesSent = totalBytesSent + FRAME_SIZE;	
+	}
+	///////
+
 
 	//FIXME: replace with real file content
 	char* StrBuffer = NULL;
@@ -87,6 +163,7 @@ int main(int argc, char* argv[])
 
 	}
 
+	//////////////////*****
 	//wait for summary msg
 	int recv_suceed = ReceiveString(summary_msg, Socket, INFINITE, &ChannelAddr, &ChannelAddrSize, &recv_msg_size);
 	if (recv_suceed == ERROR_CODE)

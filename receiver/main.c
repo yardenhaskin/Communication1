@@ -1,5 +1,6 @@
 #include "main.h"
 #include "messages.h"
+#include "reciever.h"
 
 int main(int argc, char* argv[])
 {
@@ -29,8 +30,13 @@ int main(int argc, char* argv[])
 	char channel_port[INET_ADDRSTRLEN];
 	HANDLE end_thread;
 	u_long iMode = 1; //Non-Blocking socket
-
-
+	/////////////////////***
+	char file_buffer[ENCODED_SIZE];
+	unsigned char* buffer_PACKET_TOTAL_SIZE = malloc(sizeof(char) * PACKET_TOTAL_SIZE); // create place in stack for the message received 
+	unsigned char rcv_buffer[ENCODED_SIZE];
+	int curr_bytes_received;
+	memset(rcv_buffer, 0, ENCODED_SIZE);// Set all elements to 0
+	//////////////////*****
 
 	//init WinSock
 	WSADATA wsaData;
@@ -95,7 +101,7 @@ int main(int argc, char* argv[])
 	static int timeout = TIMEOUT_MS;
 	setsockopt(Socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
 
-	while (1) 
+	while (1)
 	{
 		if (WAIT_OBJECT_0 == WaitForSingleObject(end_thread, 0)) // the user entered End
 			break;
@@ -117,19 +123,32 @@ int main(int argc, char* argv[])
 		inet_ntop(AF_INET, &ChannelAddr.sin_addr, channel_ip, sizeof(channel_ip));
 		itoa(ntohs(ChannelAddr.sin_port), channel_port, 10);
 		//printf("\nchannel IP is: %s\nchannel port is: %s\n", channel_ip, channel_port);
+		////////////////////***********
+		memset(buffer_PACKET_TOTAL_SIZE, 0, PACKET_TOTAL_SIZE);
 
-
-		//printf("msg is: %s\n", received_msg);
-		//printf("recv_msg_size: %d bytes\n", recv_msg_size);
-
-		total_msg_size += recv_msg_size;
-
-		//FIXME add here the write to file code and update wrote, detected & corected
-		total_written += 0;
-		total_corrected += 0;
+		////WE NEED TO CHANGE THAT IN THE INTEGRATION. I USED "recvfrom"
+		curr_bytes_received = recvfrom(s, buffer_PACKET_TOTAL_SIZE, PACKET_TOTAL_SIZE, 0, (struct sockaddr*) & ChannelAddr, &w);
+		if (curr_bytes_received < 0) {
+			fprintf(stderr, "Error in recvfrom!\n");
+			exit(-1);
+		}
+		totalBytes = totalBytes + curr_bytes_received;
+		error_handler(buffer_PACKET_TOTAL_SIZE);
+		writeCount += PACKET_DATA_SIZE;
 	}
 
+	free(buffer_PACKET_TOTAL_SIZE);
+	//////////////********
+
+	//	total_msg_size += recv_msg_size;
+
+		//FIXME add here the write to file code and update wrote, detected & corected
+		//total_written += 0;
+		//total_corrected += 0;
+	//}
+
 	//end received
+
 
 	//printf("received: %d bytes\nwrote: %d bytes\ndetected & corrected %d errors\n", recv_msg_size, total_written, total_corrected);
 	construct_summary_msg(summary_msg, total_msg_size, total_written, total_corrected);
@@ -148,7 +167,6 @@ int main(int argc, char* argv[])
 		WSACleanup();
 		return ERROR_CODE;
 	}
-
 
 	//finish
 	CloseHandle(end_thread);
