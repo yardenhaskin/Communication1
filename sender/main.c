@@ -101,8 +101,9 @@ int main(int argc, char* argv[])
 		while (bits_from_file < (PACKET_DATA_SIZE * BYTE_SIZE)) { //iteration to read bits from file to fill a message
 
 			next_bit = readBit();
+
 			//if EOF continue to sending the messages
-			if (next_bit == -1) {
+			if (next_bit == END_OF_FILE) {
 				end_of_file = 1;
 				break;
 			}
@@ -119,11 +120,16 @@ int main(int argc, char* argv[])
 
 			bits_from_file++;
 		}
-		intArrayToUnsignedChar(ready_bits_buffer, send_buffer, PACKET_TOTAL_SIZE);
+		bytes_to_send = (bits_from_file * 15) / 88;
+
+		intArrayToUnsignedChar(ready_bits_buffer, send_buffer, bytes_to_send);
 
 		//finished reading and prepering data for a single packet
 		//now we'll send it
-		bytes_to_send = bits_from_file * 15 / 88;
+		//for (int l = 0; l < bytes_to_send; l++)
+		//{
+		//	printf("%c", send_buffer[l]);
+		//}
 		int send_suceed = SendString(send_buffer, Socket, RecvAddr, bytes_to_send);
 		if (send_suceed == ERROR_CODE)
 		{

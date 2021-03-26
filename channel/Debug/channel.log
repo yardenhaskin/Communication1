@@ -1,2 +1,8 @@
-﻿  messages.c
+﻿  main.c
+C:\Users\user\Desktop\communication\ex1\Communication1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\ws2ipdef.h(935): message : see previous definition of 'INET_ADDRSTRLEN'
+C:\Users\user\Desktop\communication\ex1\Communication1\channel\main.c(20,7): warning C4101: 'noise_msg': unreferenced local variable
+C:\Users\user\Desktop\communication\ex1\Communication1\channel\main.c(31,16): warning C4101: 'listen_res': unreferenced local variable
+C:\Users\user\Desktop\communication\ex1\Communication1\channel\main.c(153): warning C4716: 'generate_noise': must return a value
+C:\Users\user\Desktop\communication\ex1\Communication1\channel\main.c(206): warning C4715: 'get_num_of_flips': not all control paths return a value
   channel.vcxproj -> C:\Users\user\Desktop\communication\ex1\Communication1\Debug\channel.exe

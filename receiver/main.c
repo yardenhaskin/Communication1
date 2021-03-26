@@ -120,6 +120,10 @@ int main(int argc, char* argv[])
 		else if (recv_suceed == NREADY) //no msg sent yet - this is a non-blocking port!
 			continue;
 
+		//for (int l = 0; l < recv_msg_size; l++)
+		//{
+		//	printf("%c", received_msg[l]);
+		//}
 		//printf("recv_msg_size: %d", recv_msg_size);
 
 

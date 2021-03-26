@@ -2,7 +2,6 @@
 C:\Users\user\Desktop\communication\ex1\Communication1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\ws2ipdef.h(935): message : see previous definition of 'INET_ADDRSTRLEN'
 C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(39,15): warning C4013: 'open_file' undefined; assuming extern returning int
-C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(133,58): warning C4020: 'error_handler': too many actual parameters
 C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(34,7): warning C4101: 'file_buffer': unreferenced local variable
 C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(37,6): warning C4101: 'curr_bytes_received': unreferenced local variable
 C:\Users\user\Desktop\communication\ex1\Communication1\receiver\main.c(26,16): warning C4101: 'listen_res': unreferenced local variable

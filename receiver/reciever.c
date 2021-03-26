@@ -41,20 +41,20 @@ int checkQ8(int* beforeDecoding15) {
 	return q8;
 }
 
-int errorFixed(int* beforeDecoding15, int q1, int q2, int q4, int q8) {
-	int errorFixed;
-	errorFixed = (beforeDecoding15[0] ^ q1) + (beforeDecoding15[1] ^ q2) + (beforeDecoding15[3] ^ q4) + (beforeDecoding15[7] ^ q8);
-	return errorFixed;
+int checkForError(int* beforeDecoding15, int q1, int q2, int q4, int q8) {
+	int isError;
+	isError = (beforeDecoding15[0] ^ q1) + (beforeDecoding15[1] ^ q2) + (beforeDecoding15[3] ^ q4) + (beforeDecoding15[7] ^ q8);
+	return isError;
 }
 
 int calculateBitToFix(int* beforeDecoding15, int q1, int q2, int q4, int q8) {
 	int bitToFix;
-	bitToFix = (beforeDecoding15[0] ^ q1) + 2 * (beforeDecoding15[1] ^ q2) + 4 * (beforeDecoding15[3] ^ q4) + 8 * (beforeDecoding15[7] ^ q8);
+	bitToFix = (beforeDecoding15[0] ^ q1) + 2 * (beforeDecoding15[1] ^ q2) + 4 * (beforeDecoding15[3] ^ q4) + 8 * (beforeDecoding15[7] ^ q8)-1;
 	return bitToFix;
 
 }
 
-int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15)
+int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15, int* buffer_corrected)
 {
 	int q1, q2, q4, q8;
 	int BitToFix = 0;
@@ -66,16 +66,15 @@ int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15)
 	q4 = checkQ4(beforeDecoding15);
 	q8 = checkQ8(beforeDecoding15);
 
-	if (errorFixed(beforeDecoding15,q1,q2,q4,q8))
+	if (checkForError(beforeDecoding15,q1,q2,q4,q8))
 	{
-		errors_fixed += 1;
-		BitToFix = 0;
+		BitToFix = calculateBitToFix(beforeDecoding15, q1, q2, q4, q8);
 	}
 	else
-		BitToFix = calculateBitToFix(beforeDecoding15,  q1, q2, q4,q8);
+		BitToFix = 0;
 
 	if (BitToFix)
-		flip_bit(beforeDecoding15, BitToFix); // fixes the bit and adds to errors count 
+		flip_bit(beforeDecoding15, BitToFix, buffer_corrected); // fixes the bit and adds to errors count 
 
 	decodedResult11Bit[0] = beforeDecoding15[2];
 	decodedResult11Bit[1] = beforeDecoding15[4];
@@ -96,14 +95,13 @@ int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15)
 }
 
 // the function flipps a bit if it is needed 
-void flip_bit(int* res_15, int bitToFix)
+void flip_bit(int* res_15, int bitToFix, int* buffer_corrected)
 {
 	int flipped_bit;
 	//pick the flipped bit
 	flipped_bit = res_15[bitToFix - 1];
 	errors_fixed += 1;
-
-
+	*buffer_corrected += 1;
 	
 	//flip it back
 	if (flipped_bit == 0)
@@ -113,14 +111,17 @@ void flip_bit(int* res_15, int bitToFix)
 
 	return;
 }
-void writeToFile(unsigned char* send_buffer, int buffer_size) {
-	if (fwrite(send_buffer, sizeof(char), buffer_size, fp) < 0) {
+void writeToFile(unsigned char* send_buffer, int buffer_size, int* buffer_written) {
+	int result = 0;
+	result = fwrite(send_buffer, sizeof(char), buffer_size, fp);
+	if (result < 0) {
 		fprintf(stderr, "Error accured while trying to write to the file. please try again\n");
 		return(ERROR_CODE);
 	}
+	*buffer_written = result;
 }
 // this function converts int array into unsigned char array and writes it to file 
-void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size)
+void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size, int* buffer_written)
 {
 	int temp = 0;
 	int i = 0, j = 0, current = 0;
@@ -137,7 +138,7 @@ void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int b
 		}
 		send_buffer[i] = current;
 	}
-	writeToFile(send_buffer, buffer_size);
+	writeToFile(send_buffer, buffer_size, buffer_written);
 	//if (fwrite(send_buffer, sizeof(char), PACKET_DATA_SIZE, fp) < 0) {
 	//	fprintf(stderr, "Error accured while trying to write to the file. please try again\n");
 	//	exit(-1);
@@ -177,9 +178,9 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 
 	memset(send_buffer, 0, PACKET_DATA_SIZE); // fill the buffer with  PACKET_DATA_SIZE zeros
 	count_15 = ENCODED_SIZE - 1;
-	send_buffer_size = buffer_size * 11 / 15;
+	send_buffer_size = (buffer_size * 11) / 15;
 
-	for (int i = 0; i < send_buffer_size; i++) {
+	for (int i = 0; i < buffer_size; i++) {
 		current = buffer[i];
 
 		for (int j = 0; j < BYTE_SIZE; j++) {
@@ -188,11 +189,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 			count_15 -= 1;
 			if (count_15 < 0)
 			{
-				bitToFix = decode_hamming(decodedResult11Bit, beforeDecoding15); // will fill decoded resolution to the int array - before flipping the bit 
-				//*buffer_corrected += 1; FIXME
-
-
-
+				bitToFix = decode_hamming(decodedResult11Bit, beforeDecoding15, buffer_corrected); // will fill decoded resolution to the int array - before flipping the bit 
 				for (int k = 0; k < DECODED_SIZE; k++)
 				{
 					packet_bytes_int_arr[k + bufferIndex] = decodedResult11Bit[k]; // fill buffer array with currentent hamming decoded 
@@ -206,7 +203,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 
 	} // finished reading and decoding the whole packet, time to write it to file 
 
-	IntArrayToSendBuffer(packet_bytes_int_arr, send_buffer, send_buffer_size);
+	IntArrayToSendBuffer(packet_bytes_int_arr, send_buffer, send_buffer_size, buffer_written);
 }
 
 

@@ -22,13 +22,13 @@ int checkQ1(int* beforeDecoding15);
 int checkQ2(int* beforeDecoding15);
 int checkQ4(int* beforeDecoding15);
 int checkQ8(int* beforeDecoding15);
-int errorFixed(int* beforeDecoding15, int q1, int q2, int q4, int q8);
+int checkForError(int* beforeDecoding15, int q1, int q2, int q4, int q8);
 int calculateBitToFix(int* beforeDecoding15, int q1, int q2, int q4, int q8);
-int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15);
-void flip_bit(int* res_15, int bitToFix);
-void writeToFile(unsigned char* send_buffer, int buffer_size);
-void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size);
-void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size);
+int decode_hamming(int* decodedResult11Bit, int* beforeDecoding15, int* buffer_corrected);
+void flip_bit(int* res_15, int bitToFix, int* buffer_corrected);
+void writeToFile(unsigned char* send_buffer, int buffer_size, int* buffer_written);
+void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size, int* buffer_written);
+void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int* buffer_written, int* buffer_corrected);
 int checkBuffer(unsigned char buffer[PACKET_TOTAL_SIZE]);
 
 

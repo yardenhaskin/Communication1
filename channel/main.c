@@ -108,7 +108,6 @@ int main(int argc, char* argv[])
 		ReceiverAddr.sin_family = AF_INET;
 		ReceiverAddr.sin_addr.s_addr = inet_addr(receiver_ip);
 		ReceiverAddr.sin_port = htons(atoi(receiver_port));
-
 		send_suceed = SendString(received_msg, Socket, ReceiverAddr, recv_msg_size);
 		if (send_suceed == ERROR_CODE)
 		{
@@ -167,28 +166,29 @@ void generate_noise_for_byte(unsigned char* received_msg, double p, int byte_ind
 
 	for (i = 1; i <= num_of_flips; i++)
 	{
-		while (mask == (mask || temp_mask)) //make sure different bit flips
+		while (mask == (mask | temp_mask)) //make sure different bit flips
 		{
 			temp_mask = 0x01;
 			//get random bit
-			index = rand() % 7;
+			index = rand() % 8;
 			temp_mask = temp_mask << index;
 		}
 
-		mask = temp_mask;
+		mask = mask | temp_mask;
 
 		printf("flip bit is: %d\n\n", index); //FIXME: remove after debug
-
-		//flip bit
-		 result = received_msg[byte_index] ^ mask;
-		 received_msg[byte_index] = result;
 	}
+	//flip bit
+	result = received_msg[byte_index] ^ mask;
+	received_msg[byte_index] = result;
 }
 
 int get_num_of_flips(int num_of_bits, double p)
 {
-
-	double threshold = (double)rand() / RAND_MAX;
+	double rnd = dblrand();
+	double threshold = rnd / MAX_RAND_DOUBLE;
+	if (threshold == 1)
+		printf("%lf\n", rnd);
 	int i;
 	int choose_result;
 	double no_flip_prob;
@@ -200,7 +200,7 @@ int get_num_of_flips(int num_of_bits, double p)
 		no_flip_prob = pow((1 - p), (num_of_bits - i));
 		flip_prob = pow(p, i);
 		probability_of_i_bit_flips += choose_result * no_flip_prob * flip_prob;
-		if (threshold < probability_of_i_bit_flips)
+		if (threshold <= probability_of_i_bit_flips)
 			return i;
 	}
 }
@@ -212,4 +212,14 @@ int choose(int n, int k)
 		return 1;
 	}
 	return ((n * choose(n - 1, k - 1)) / k);
+}
+
+double dblrand() {
+	unsigned long long r = 0;
+
+	for (int i = 0; i < 3; ++i) {
+		r = (r << 15) | (rand() & 0x7FFF);
+	}
+
+	return (double)(r & 0x1fffffffffffULL);
 }
