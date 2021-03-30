@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 	//check number of arguments
 	if (argc != 3)
 	{
-		printf("There are too many or not enough arguments");
+		fprintf(stderr, "There are too many or not enough arguments");
 		return ERROR_CODE;
 	}
 
@@ -23,18 +23,17 @@ int main(int argc, char* argv[])
 
 	SOCKET Socket = INVALID_SOCKET;
 	SOCKADDR_IN service;
-	int bind_res, listen_res;
+	int bind_res;
 	struct sockaddr_in ChannelAddr;
 	int ChannelAddrSize = sizeof(ChannelAddr);
 	char channel_ip[INET_ADDRSTRLEN];
 	char channel_port[INET_ADDRSTRLEN];
+
+
 	HANDLE end_thread;
 	u_long iMode = 1; //Non-Blocking socket
 	/////////////////////***
-	char file_buffer[ENCODED_SIZE];
-	//unsigned char* buffer_PACKET_TOTAL_SIZE = malloc(sizeof(char) * PACKET_TOTAL_SIZE); // create place in stack for the message received 
 	unsigned char rcv_buffer[ENCODED_SIZE];
-	int curr_bytes_received;
 
 	if (open_file(output_file_name) != 0)
 		return(ERROR_CODE);
@@ -46,14 +45,14 @@ int main(int argc, char* argv[])
 	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != NO_ERROR)
 	{
-		printf("Error at WSAStartup()\n");
+		fprintf(stderr, "Error at WSAStartup()\n");
 		return ERROR_CODE;
 	}
 
 	//Create Socket for receiving data
 	Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (Socket == INVALID_SOCKET) {
-		printf("socket failed with error: %ld\n", WSAGetLastError());
+		fprintf(stderr, "socket failed with error: %ld\n", WSAGetLastError());
 		WSACleanup();
 		return ERROR_CODE;
 	}
@@ -66,7 +65,7 @@ int main(int argc, char* argv[])
 	bind_res = bind(Socket, (SOCKADDR*)&service, sizeof(service));
 	if (bind_res == SOCKET_ERROR)
 	{
-		printf("bind() had failed. Error Code %ld. Closing program\n", WSAGetLastError());
+		fprintf(stderr, "bind() had failed. Error Code %ld. Closing program\n", WSAGetLastError());
 		closesocket(Socket);
 		return ERROR_CODE;
 	}
@@ -81,19 +80,19 @@ int main(int argc, char* argv[])
 		NULL);
 
 	if (end_thread == NULL) {
-		printf("Error creating exit_thread.. exiting program.\n");
+		fprintf(stderr, "Error creating exit_thread.. exiting program.\n");
 		closesocket(Socket);
 		WSACleanup();
 		return ERROR_CODE;
 	}
 
-	printf("Type \"End\" when done\n");
+	fprintf(stderr, "Type \"End\" when done\n");
 
 	//Non-blocking socket
 	iResult = ioctlsocket(Socket, FIONBIO, &iMode);
 	if (iResult != NO_ERROR)
 	{
-		printf("ioctlsocket failed with error: %ld\n", iResult);
+		fprintf(stderr, "ioctlsocket failed with error: %ld\n", iResult);
 		CloseHandle(end_thread);
 		closesocket(Socket);
 		WSACleanup();
@@ -109,7 +108,7 @@ int main(int argc, char* argv[])
 		if (WAIT_OBJECT_0 == WaitForSingleObject(end_thread, 0)) // the user entered End
 			break;
 
-		int recv_suceed = ReceiveString(received_msg, Socket, INFINITE, &ChannelAddr, &ChannelAddrSize, &recv_msg_size);
+		int recv_suceed = ReceiveMsg(received_msg, Socket, INFINITE, &ChannelAddr, &ChannelAddrSize, &recv_msg_size);
 		if (recv_suceed == ERROR_CODE)
 		{
 			CloseHandle(end_thread);
@@ -149,14 +148,14 @@ int main(int argc, char* argv[])
 
 	//printf("received: %d bytes\nwrote: %d bytes\ndetected & corrected %d errors\n", recv_msg_size, total_written, total_corrected);
 	construct_summary_msg(summary_msg, total_msg_size, total_written, total_corrected);
-	printf("%s\n", summary_msg);
+	fprintf(stderr, "%s\n", summary_msg);
 
 	service.sin_family = AF_INET;
 	service.sin_addr.s_addr = inet_addr(channel_ip);
 	service.sin_port = htons(atoi(channel_port));
 
 
-	send_suceed = SendString(summary_msg, Socket, service, strlen(summary_msg) + 1);
+	send_suceed = SendMsg(summary_msg, Socket, service, strlen(summary_msg) + 1);
 	if (send_suceed == ERROR_CODE)
 	{
 		CloseHandle(end_thread);

@@ -1,10 +1,8 @@
-﻿  main.c
-C:\Users\user\Desktop\communication\ex1\Communication1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
+﻿  messages.c
+  main.c
+C:\Users\leose\source\repos\ex1\share\messages.h(37,1): warning C4005: 'INET_ADDRSTRLEN': macro redefinition
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\ws2ipdef.h(935): message : see previous definition of 'INET_ADDRSTRLEN'
-C:\Users\user\Desktop\communication\ex1\Communication1\sender\main.c(30,6): warning C4101: 'bytes_sent': unreferenced local variable
-C:\Users\user\Desktop\communication\ex1\Communication1\sender\main.c(35,8): warning C4101: 'ip': unreferenced local variable
-C:\Users\user\Desktop\communication\ex1\Communication1\sender\main.c(41,6): warning C4101: 'bytes_to_file': unreferenced local variable
-C:\Users\user\Desktop\communication\ex1\Communication1\sender\main.c(31,6): warning C4101: 'bytesLeftToSend': unreferenced local variable
-C:\Users\user\Desktop\communication\ex1\Communication1\sender\main.c(36,7): warning C4101: 'receive_buffer': unreferenced local variable
-C:\Users\user\Desktop\communication\ex1\Communication1\sender\main.c(23,16): warning C4101: 'listen_res': unreferenced local variable
-  sender.vcxproj -> C:\Users\user\Desktop\communication\ex1\Communication1\Debug\sender.exe
+  sender.c
+C:\Users\leose\source\repos\ex1\sender\sender.c(95,21): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
+  Generating Code...
+  sender.vcxproj -> C:\Users\leose\source\repos\ex1\Debug\sender.exe

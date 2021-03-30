@@ -19,9 +19,9 @@
 
 //functions
 int SendBuffer(const char* Buffer, int BytesToSend, SOCKET sd, SOCKADDR_IN RecvAddr);
-int SendString(const char* Str, SOCKET sd, SOCKADDR_IN RecvAddr, int BytesToSend);
+int SendMsg(const char* Str, SOCKET sd, SOCKADDR_IN RecvAddr, int BytesToSend);
 int ReceiveBuffer(char* OutputBuffer, int BytesToReceive, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize);
-int ReceiveString(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize, int* recv_msg_size);
+int ReceiveMsg(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize, int* recv_msg_size);
 
 
 //functions
@@ -33,7 +33,7 @@ DWORD end_thread_action(void* not_relevant);
 #define STRINGS_ARE_EQUAL( Str1, Str2 ) ( strcmp( (Str1), (Str2) ) == 0 )
 static const int ERROR_CODE = -1;
 #define MY_ADDRESS "127.0.0.1"
-#define PACKET_TOTAL_SIZE 120// = 15(bits)*8(total bytes per message) in bytes
+#define PACKET_TOTAL_SIZE 1200// = 15(bits)*8(total bytes per message) in bytes
 #define INET_ADDRSTRLEN 30
 #define SUMMARY_MSG 200
 #define MAX_INT_LEN 15

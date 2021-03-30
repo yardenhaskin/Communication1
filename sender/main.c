@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 	//check number of arguments
 	if (argc != 4)
 	{
-		printf("There are too many or not enough arguments");
+		fprintf(stderr, "There are too many or not enough arguments");
 		return ERROR_CODE;
 	}
 
@@ -20,25 +20,20 @@ int main(int argc, char* argv[])
 	int bytes_to_send = 0;	
 	SOCKADDR_IN RecvAddr;
 	SOCKADDR_IN service;
-	int bind_res, listen_res;
+	int bind_res;
 	char summary_msg[SUMMARY_MSG];
 	struct sockaddr_in ChannelAddr;
 	int ChannelAddrSize = sizeof(ChannelAddr);
 	int recv_msg_size = 0;
 	/////////////////////////////////////////////////////
 	int iResult = 0;
-	int bytes_sent;
-	int bytesLeftToSend;
 	int totalBytesSent = 0;
 	int end_of_file = 0;
 	int next_bit;
-	char* ip;
-	char receive_buffer[PACKET_TOTAL_SIZE];
 
 	int data[11];
 	int data_after_hamming[15];
 	int bits_from_file;
-	int bytes_to_file;
 	int data_counter;
 	int ready_bits;
 	int ready_bits_buffer[PACKET_TOTAL_SIZE * BYTE_SIZE * INT_SIZE_IN_BYTES];
@@ -52,7 +47,7 @@ int main(int argc, char* argv[])
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != NO_ERROR)
 	{
-		printf("Error at WSAStartup()\n");
+		fprintf(stderr, "Error at WSAStartup()\n");
 		return ERROR_CODE;
 	}
 
@@ -130,27 +125,31 @@ int main(int argc, char* argv[])
 		//{
 		//	printf("%c", send_buffer[l]);
 		//}
-		int send_suceed = SendString(send_buffer, Socket, RecvAddr, bytes_to_send);
+		int send_suceed = SendMsg(send_buffer, Socket, RecvAddr, bytes_to_send);
 		if (send_suceed == ERROR_CODE)
 		{
 			return ERROR_CODE;
 		}
+		totalBytesSent += bytes_to_send;
+		//printf("bytes_to_send: %d\n", bytes_to_send);
 
 		//		totalBytesSent = totalBytesSent + FRAME_SIZE;	
 	}
 	///////
 
+	//printf("totalBytesSent: %d\n", totalBytesSent);
+
 
 
 	//////////////////*****
 	//wait for summary msg
-	int recv_suceed = ReceiveString(summary_msg, Socket, INFINITE, &ChannelAddr, &ChannelAddrSize, &recv_msg_size);
+	int recv_suceed = ReceiveMsg(summary_msg, Socket, INFINITE, &ChannelAddr, &ChannelAddrSize, &recv_msg_size);
 	if (recv_suceed == ERROR_CODE)
 	{
 		return ERROR_CODE;
 	}
 
-	printf("%s\n", summary_msg);
+	fprintf(stderr, "%s\n", summary_msg);
 
 	//finish
 	closesocket(Socket);

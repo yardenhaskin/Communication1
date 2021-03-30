@@ -21,7 +21,7 @@
 #include "winsock2.h"
 #include "ws2tcpip.h"
 
-int generate_noise(unsigned char* received_msg, int single_bit_err_prob, int recv_msg_size, int* bits_flipped);
+void generate_noise(unsigned char* received_msg, int single_bit_err_prob, int recv_msg_size, int* bits_flipped);
 void generate_noise_for_byte(unsigned char* received_msg, double p, int byte_index, int* bits_flipped);
 int get_num_of_flips(int num_of_bits, double p);
 int choose(n, k);

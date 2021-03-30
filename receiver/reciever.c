@@ -49,7 +49,7 @@ int checkForError(int* beforeDecoding15, int q1, int q2, int q4, int q8) {
 
 int calculateBitToFix(int* beforeDecoding15, int q1, int q2, int q4, int q8) {
 	int bitToFix;
-	bitToFix = (beforeDecoding15[0] ^ q1) + 2 * (beforeDecoding15[1] ^ q2) + 4 * (beforeDecoding15[3] ^ q4) + 8 * (beforeDecoding15[7] ^ q8)-1;
+	bitToFix = (beforeDecoding15[0] ^ q1) + 2 * (beforeDecoding15[1] ^ q2) + 4 * (beforeDecoding15[3] ^ q4) + 8 * (beforeDecoding15[7] ^ q8);
 	return bitToFix;
 
 }
@@ -105,13 +105,13 @@ void flip_bit(int* res_15, int bitToFix, int* buffer_corrected)
 	
 	//flip it back
 	if (flipped_bit == 0)
-		res_15[bitToFix] = 1;
+		res_15[bitToFix - 1] = 1;
 	else
-		res_15[bitToFix] = 0;
+		res_15[bitToFix - 1] = 0;
 
 	return;
 }
-void writeToFile(unsigned char* send_buffer, int buffer_size, int* buffer_written) {
+int writeToFile(unsigned char* send_buffer, int buffer_size, int* buffer_written) {
 	int result = 0;
 	result = fwrite(send_buffer, sizeof(char), buffer_size, fp);
 	if (result < 0) {
@@ -119,6 +119,7 @@ void writeToFile(unsigned char* send_buffer, int buffer_size, int* buffer_writte
 		return(ERROR_CODE);
 	}
 	*buffer_written = result;
+	return 0;
 }
 // this function converts int array into unsigned char array and writes it to file 
 void IntArrayToSendBuffer(int* data_array_int, unsigned char* send_buffer, int buffer_size, int* buffer_written)
@@ -173,7 +174,6 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 	int beforeDecoding15[ENCODED_SIZE];
 	int decodedResult11Bit[DECODED_SIZE];
 	int send_buffer_size;
-	
 
 
 	memset(send_buffer, 0, PACKET_DATA_SIZE); // fill the buffer with  PACKET_DATA_SIZE zeros
@@ -183,6 +183,7 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 	for (int i = 0; i < buffer_size; i++) {
 		current = buffer[i];
 
+
 		for (int j = 0; j < BYTE_SIZE; j++) {
 			beforeDecoding15[ENCODED_SIZE - 1 - count_15] = (current & 0x80) > 0; // msb of letter = 10000000
 			current = current << 1; 
@@ -190,6 +191,8 @@ void error_handler(unsigned char buffer[PACKET_TOTAL_SIZE], int buffer_size, int
 			if (count_15 < 0)
 			{
 				bitToFix = decode_hamming(decodedResult11Bit, beforeDecoding15, buffer_corrected); // will fill decoded resolution to the int array - before flipping the bit 
+				//if(bitToFix != 0)
+					//printf("j is %d flip bit num %d in byte number %d\n", j, bitToFix, i+1);
 				for (int k = 0; k < DECODED_SIZE; k++)
 				{
 					packet_bytes_int_arr[k + bufferIndex] = decodedResult11Bit[k]; // fill buffer array with currentent hamming decoded 

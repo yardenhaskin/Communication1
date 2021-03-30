@@ -39,11 +39,11 @@ int SendBuffer(const char* Buffer, int BytesToSend, SOCKET sd, SOCKADDR_IN RecvA
 }
 
 /*
- * SendString() uses a socket to send a string.
+ * SendMsg() uses a socket to send a string.
  * Str - the string to send.
  * sd - the socket used for communication.
  */
-int SendString(const char* Str, SOCKET sd, SOCKADDR_IN RecvAddr, int BytesToSend)
+int SendMsg(const char* Str, SOCKET sd, SOCKADDR_IN RecvAddr, int BytesToSend)
 {
 	/* Send the the request to the server on socket sd */
 	int TotalStringSizeInBytes;
@@ -119,14 +119,14 @@ int ReceiveBuffer(char* OutputBuffer, int BytesToReceive, SOCKET sd, int timeout
 }
 
 /*
- * ReceiveString() uses a socket to receive a string, and stores it in dynamic memory.
+ * ReceiveMsg() uses a socket to receive a string, and stores it in dynamic memory.
  *
  * Input:
  * -------
  * OutputStrPtr - a pointer to a char-pointer that is initialized to NULL, as in:
  *
  *		char *Buffer = NULL;
- *		ReceiveString( &Buffer, ___ );
+ *		ReceiveMsg( &Buffer, ___ );
  *
  * a dynamically allocated string will be created, and (*OutputStrPtr) will point to it.
  *
@@ -137,7 +137,7 @@ int ReceiveBuffer(char* OutputBuffer, int BytesToReceive, SOCKET sd, int timeout
  * TRNS_DISCONNECTED - if the socket was disconnected
  * TRNS_FAILED - otherwise
  */
-int ReceiveString(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize, int* recv_msg_size)
+int ReceiveMsg(char* OutputStr, SOCKET sd, int timeout, SOCKADDR_IN* SenderAddr, int* SenderAddrSize, int* recv_msg_size)
 {
 	/* Recv the request from the server on socket sd */
 	int TotalStringSizeInBytes;

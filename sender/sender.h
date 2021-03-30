@@ -21,11 +21,10 @@
 #define END_OF_FILE -5
 
 
-#define PACKET_DATA_SIZE 88// = 11(bits)*8(data bytes per message)  in bytes
-#define PACKET_TOTAL_SIZE 120// = 15(bits)*8(total bytes per message) in bytes
+#define PACKET_DATA_SIZE 880// = 11(bits)*8(data bytes per message)  in bytes
+#define PACKET_TOTAL_SIZE 1200// = 15(bits)*8(total bytes per message) in bytes
 
 
-WSADATA wsaData;
 SOCKET s;
 
 char readed_byte;

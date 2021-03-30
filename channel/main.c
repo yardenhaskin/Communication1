@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
 	//check number of arguments
 	if (argc != 6)
 	{
-		printf("There are too many or not enough arguments");
+		fprintf(stderr, "There are too many or not enough arguments");
 		return ERROR_CODE;
 	}
 
@@ -17,7 +17,6 @@ int main(int argc, char* argv[])
 	int single_bit_err_prob = atoi(argv[4]);
 	int random_seed = atoi(argv[5]);
 	char received_msg[PACKET_TOTAL_SIZE];
-	char noise_msg[PACKET_TOTAL_SIZE];
 	int recv_msg_size = 0;
 	int total_msg_size = 0;
 	int bits_flipped = 0;
@@ -28,7 +27,7 @@ int main(int argc, char* argv[])
 
 	SOCKET Socket = INVALID_SOCKET;
 	SOCKADDR_IN service;
-	int bind_res, listen_res;
+	int bind_res;
 	struct sockaddr_in SenderAddr;
 	int SenderAddrSize = sizeof(SenderAddr);
 	SOCKADDR_IN ReceiverAddr;
@@ -36,6 +35,9 @@ int main(int argc, char* argv[])
 	char sender_port[INET_ADDRSTRLEN];
 	char sender_or_receiver_ip[INET_ADDRSTRLEN];
 	char sender_or_receiver_port[INET_ADDRSTRLEN];
+
+
+
 
 	srand(random_seed);
 
@@ -45,14 +47,14 @@ int main(int argc, char* argv[])
 	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != NO_ERROR)
 	{
-		printf("Error at WSAStartup()\n");
+		fprintf(stderr, "Error at WSAStartup()\n");
 		return ERROR_CODE;
 	}
 
 	//Create Socket for receiving data
 	Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (Socket == INVALID_SOCKET) {
-		printf("socket failed with error: %ld\n", WSAGetLastError());
+		fprintf(stderr, "socket failed with error: %ld\n", WSAGetLastError());
 		WSACleanup();
 		return ERROR_CODE;
 	}
@@ -65,14 +67,14 @@ int main(int argc, char* argv[])
 	bind_res = bind(Socket, (SOCKADDR*)&service, sizeof(service));
 	if (bind_res == SOCKET_ERROR)
 	{
-		printf("bind() had failed. Error Code %ld. Closing program\n", WSAGetLastError());
+		fprintf(stderr, "bind() had failed. Error Code %ld. Closing program\n", WSAGetLastError());
 		closesocket(Socket);
 		return ERROR_CODE;
 	}
 
 	while(1)
 	{
-		recv_suceed = ReceiveString(received_msg, Socket, INFINITE, &SenderAddr, &SenderAddrSize, &recv_msg_size);
+		recv_suceed = ReceiveMsg(received_msg, Socket, INFINITE, &SenderAddr, &SenderAddrSize, &recv_msg_size);
 		if (recv_suceed == ERROR_CODE)
 		{
 			return ERROR_CODE;
@@ -94,13 +96,13 @@ int main(int argc, char* argv[])
 			STRINGS_ARE_EQUAL(sender_or_receiver_port, receiver_port)) // msg is from reciever - send back to sender
 			break;
 
-		//printf("msg is: %s\n", received_msg);
-		//printf("msg size is: %d\n", recv_msg_size);
+		//fprintf(stderr, "msg is: %s\n", received_msg);
+		//fprintf(stderr, "msg size is: %d\n", recv_msg_size);
 
 		//Noise the channel
 
 		generate_noise(received_msg, single_bit_err_prob, recv_msg_size, &bits_flipped);
-		//printf("noised msg is: %s\n", noise_msg);
+		//fprintf(stderr, "noised msg is: %s\n", noise_msg);
 
 
 
@@ -108,7 +110,7 @@ int main(int argc, char* argv[])
 		ReceiverAddr.sin_family = AF_INET;
 		ReceiverAddr.sin_addr.s_addr = inet_addr(receiver_ip);
 		ReceiverAddr.sin_port = htons(atoi(receiver_port));
-		send_suceed = SendString(received_msg, Socket, ReceiverAddr, recv_msg_size);
+		send_suceed = SendMsg(received_msg, Socket, ReceiverAddr, recv_msg_size);
 		if (send_suceed == ERROR_CODE)
 		{
 			return ERROR_CODE;
@@ -122,14 +124,14 @@ int main(int argc, char* argv[])
 	ReceiverAddr.sin_addr.s_addr = inet_addr(sender_ip);
 	ReceiverAddr.sin_port = htons(atoi(sender_port));
 
-	send_suceed = SendString(received_msg, Socket, ReceiverAddr, recv_msg_size);
+	send_suceed = SendMsg(received_msg, Socket, ReceiverAddr, recv_msg_size);
 	if (send_suceed == ERROR_CODE)
 	{
 		return ERROR_CODE;
 	}
-	printf("sender: %s\n", sender_ip);
-	printf("reveiver: %s\n", sender_or_receiver_ip);
-	printf("%d bytes, flliped %d bits\n", total_msg_size, bits_flipped);
+	fprintf(stderr, "sender: %s\n", sender_ip);
+	fprintf(stderr, "reveiver: %s\n", sender_or_receiver_ip);
+	fprintf(stderr, "%d bytes, flliped %d bits\n", total_msg_size, bits_flipped);
 
 	//finish
 	closesocket(Socket);
@@ -140,7 +142,7 @@ int main(int argc, char* argv[])
 }
 
 
-int generate_noise(unsigned char* received_msg, int single_bit_err_prob, int recv_msg_size, int* bits_flipped)
+void generate_noise(unsigned char* received_msg, int single_bit_err_prob, int recv_msg_size, int* bits_flipped)
 {
 	double p = single_bit_err_prob / pow(2, 16);
 
@@ -160,7 +162,7 @@ void generate_noise_for_byte(unsigned char* received_msg, double p, int byte_ind
 	int index;
 	int num_of_flips = get_num_of_flips(8, p);
 	if (num_of_flips != 0)
-		printf("num of flips in Byte %d is: %d\n", byte_index, num_of_flips); //FIXME: remove after debug
+		//fprintf(stderr, "num of flips in Byte %d is: %d\n", byte_index, num_of_flips); //FIXME: remove after debug
 
 	*bits_flipped += num_of_flips;
 
@@ -176,7 +178,7 @@ void generate_noise_for_byte(unsigned char* received_msg, double p, int byte_ind
 
 		mask = mask | temp_mask;
 
-		printf("flip bit is: %d\n\n", index); //FIXME: remove after debug
+		//fprintf(stderr, "flip bit is: %d\n\n", index); //FIXME: remove after debug
 	}
 	//flip bit
 	result = received_msg[byte_index] ^ mask;
@@ -187,8 +189,6 @@ int get_num_of_flips(int num_of_bits, double p)
 {
 	double rnd = dblrand();
 	double threshold = rnd / MAX_RAND_DOUBLE;
-	if (threshold == 1)
-		printf("%lf\n", rnd);
 	int i;
 	int choose_result;
 	double no_flip_prob;
@@ -197,12 +197,13 @@ int get_num_of_flips(int num_of_bits, double p)
 	for (i = 0; i <= num_of_bits; i++)
 	{
 		choose_result = choose(num_of_bits, i);
-		no_flip_prob = pow((1 - p), (num_of_bits - i));
+		no_flip_prob = pow((1 - p), ((double)num_of_bits - i));
 		flip_prob = pow(p, i);
 		probability_of_i_bit_flips += choose_result * no_flip_prob * flip_prob;
 		if (threshold <= probability_of_i_bit_flips)
 			return i;
 	}
+	return num_of_bits;
 }
 
 int choose(int n, int k)
